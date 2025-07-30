@@ -2,32 +2,33 @@ import math
 import pygame
 
 class Obstacle:
-    def __init__(self, x : int, y : int, r : int ):
+    def __init__(self, x : int, y : int):
         self.x = x
         self.y = y
-        self.r = r
+        self.r = None
     def get_x(self) -> int:
         return self.x
     def get_y(self) -> int:
         return self.y
-    def get_r(self) -> int:
+    def get_r(self) -> int | None:
         return self.r
 
 class Claw(Obstacle):
-    def __init__(self,x ,y , r):
-        super().__init__(x, y, r)
+    def __init__(self,x ,y):
+        super().__init__(x, y)
         self.direction : int = -1 # -1 for right , 1 for left
         self.angle : float = 90 
+        self.r = 9
         self.origin_x = x
         self.origin_y = y
         self.len = y
-        self.speed = 10  # speed along the rope
+        self.speed = 20  # speed along the rope
 
         self.image = pygame.image.load("Assets/claw.png")
         self.original_image = self.image
     # Rotate logic
     def rotate(self, screen) -> None:
-        if self.angle <= 40:
+        if self.angle <= 30:
             self.direction = 1
         elif self.angle >= 80: 
             self.direction = -1
@@ -67,66 +68,74 @@ class Claw(Obstacle):
     def get_length(self) -> int:
         return self.len
     
-class Gold_50(Obstacle):
-    def __init__(self, x, y, r):
-        super().__init__(x, y, r)
-        self.image = pygame.image.load("Assets/gold50.png")
-        self.point = 50
-    def draw_gold(self, screen) -> None:
-        image = self.image
-        rect = image.get_rect(center = (self.x,self.y))
-        screen.blit(image, rect)
-
-class Gold_100(Obstacle):
-    def __init__(self, x, y, r):
-        super().__init__(x, y, r)
-        self.image = pygame.image.load("Assets/gold100.png")
-        self.point = 100
-    def draw_gold(self, screen) -> None:
-        image = self.image
-        rect = image.get_rect(center = (self.x,self.y))
-        screen.blit(image, rect)
-
-class Gold_250(Obstacle):
-    def __init__(self, x, y, r):
-        super().__init__(x, y, r)
-        self.image = pygame.image.load("Assets/gold250.png")
-        self.point = 250
-    def draw_gold(self, screen) -> None:
-        image = self.image
-        rect = image.get_rect(center = (self.x,self.y))
-        screen.blit(image, rect)
-
-class Gold_500(Obstacle):
-    def __init__(self, x, y, r):
-        super().__init__(x, y, r)
-        self.image = pygame.image.load("Assets/gold500.png")
-        self.point = 500
-    def draw_gold(self, screen) -> None:
-        image = self.image
-        rect = image.get_rect(center = (self.x,self.y))
-        screen.blit(image, rect)
-
-class Gold_1000(Obstacle):
-    def __init__(self, x, y, r):
-        super().__init__(x, y, r)
-        self.image = pygame.image.load("Assets/gold1000.png")
-        self.point = 1000
-
-    def update(self, screen, pulled : bool, claw_x, claw_y) -> None:
-        if pulled:
+    def get_speed(self) -> None:
+        return self.speed
+    
+class Gold(Obstacle):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.image = None
+        self.point = None
+        self.mass = None
+        self.is_pulled = False
+    def update(self, screen, claw_x, claw_y, claw_speed) -> None:
+        if self.is_pulled:
             dy = abs(self.y - claw_y)
             dx = abs(self.x - claw_x)
             pulled_angle = math.atan2(dy, dx)
 
-            self.x -= math.cos(pulled_angle) * 2
-            self.y -= math.sin(pulled_angle) * 2   
-        if self.x <= claw_x and self.y <= claw_y:
-            # Delete object
-            return    
+            if self.mass:
+                self.x -= math.cos(pulled_angle) * (claw_speed / self.mass)
+                self.y -= math.sin(pulled_angle) * (claw_speed / self.mass)   
+
         self.draw_gold(screen)
 
     def draw_gold(self, screen) -> None:
-        image = self.image
-        rect = image.get_rect(center = (self.x,self.y))
-        screen.blit(image, rect)
+        if self.image:
+            image = self.image
+            rect = image.get_rect(center = (self.x,self.y))
+            screen.blit(image, rect)
+    
+    def get_m(self) -> int | None:
+        return self.mass
+
+class Gold_50(Gold):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.image = pygame.image.load("Assets/gold50.png")
+        self.r = 23
+        self.point = 50
+        self.mass = 2
+
+class Gold_100(Gold):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.image = pygame.image.load("Assets/gold100.png")
+        self.r = 25
+        self.point = 100
+        self.mass = 4
+
+class Gold_250(Gold):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.image = pygame.image.load("Assets/gold250.png")
+        self.r = 31
+        self.point = 250
+        self.mass = 8
+
+class Gold_500(Gold):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.image = pygame.image.load("Assets/gold500.png")
+        self.r = 37
+        self.point = 500
+        self.mass = 16
+
+class Gold_1000(Gold):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.image = pygame.image.load("Assets/gold1000.png")
+        self.r = 156
+        self.point = 1000
+        self.mass = 32
+
