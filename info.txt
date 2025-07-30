@@ -1,0 +1,6 @@
+Gold50's size: (44, 46) -> r = 23
+Gold100's size: (49, 52) -> r = 25
+Gold250's size: (63, 60) -> r = 31
+Gold500's size: (73, 81) -> r = 37
+Gold1000's size: (313, 313) -> r = 216
+Claw's size: (22, 18)
