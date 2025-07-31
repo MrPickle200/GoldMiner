@@ -13,47 +13,73 @@ class Generator:
             if dist < (r + obj.get_r()):
                 return True
         return False
+    def estimate_spawn_score(self, n_golds, n_bombs):
+        gold_types = [Gold_50, Gold_100, Gold_250, Gold_500, Gold_1000, Diamond, Rock_10, Rock_20]
+        total_score = 0
 
-    def spawn_objects(self, width, height, n_golds, n_bombs):
-        all_gold_types = [Gold_50, Gold_100, Gold_250, Gold_500, Gold_1000, Diamond]
+        for _ in range(n_golds):
+            GoldType = random.choice(gold_types)
+            temp = GoldType(0, 0)
+            total_score += temp.get_point()
+
+        for _ in range(n_bombs):
+            temp = Bomb(0, 0)
+            total_score += temp.get_point()
+
+        return total_score
+
+    def spawn_objects(self, width, height, n_golds, n_bombs, tolerance = 200):
+        all_gold_types = [Gold_50, Gold_100, Gold_250, Gold_500, Gold_1000, Diamond, Rock_10, Rock_20]
         golds = []
         bombs = []
-        placed_objects = []  # Used for overlap checking
+        placed_objects = []
         margin = 10
         min_y = height // 3
         max_attempts = 1000
+        current_score = 0
+        target_score = self.estimate_spawn_score(n_golds, n_bombs)
 
-        # Spawn golds
+        # Spawn fixed number of golds
         for _ in range(n_golds):
             for _ in range(max_attempts):
                 GoldType = random.choice(all_gold_types)
-                dummy = GoldType(0, 0)
-                r = dummy.get_r()
+                temp = GoldType(0, 0)
+                r = temp.get_r()
+                points = temp.get_point()
+
+                # If this would push the score too high, retry
+                if current_score + points > target_score + tolerance:
+                    continue
 
                 x = random.randint(margin + r, width - margin - r)
                 y = random.randint(min_y + r, height - margin - r)
-
                 new_gold = GoldType(x, y)
 
                 if not self.is_overlapping(x, y, r, placed_objects):
                     golds.append(new_gold)
                     placed_objects.append(new_gold)
+                    current_score += points
                     break
 
-        # Spawn bombs
+        # Spawn fixed number of bombs
         for _ in range(n_bombs):
             for _ in range(max_attempts):
-                dummy = Bomb(0, 0)
-                r = dummy.get_r()
+                temp = Bomb(0, 0)
+                r = temp.get_r()
+                points = temp.get_point()
+
+                if current_score + points > target_score + tolerance:
+                    continue
 
                 x = random.randint(margin + r, width - margin - r)
                 y = random.randint(min_y + r, height - margin - r)
-
                 new_bomb = Bomb(x, y)
 
                 if not self.is_overlapping(x, y, r, placed_objects):
                     bombs.append(new_bomb)
                     placed_objects.append(new_bomb)
+                    current_score += points
                     break
 
         return golds, bombs
+
