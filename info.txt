@@ -1,6 +1,10 @@
-Gold50's size: (44, 46) -> r = 23, m = 2
-Gold100's size: (49, 52) -> r = 25, m = 4
-Gold250's size: (63, 60) -> r = 31, m = 8
-Gold500's size: (73, 81) -> r = 37, m = 16
-Gold1000's size: (313, 313) -> r = 156, m = 32
+Gold50's size: (44, 46) -> r = 23, m = 2, score = 50
+Gold100's size: (49, 52) -> r = 25, m = 4, score = 100
+Gold250's size: (63, 60) -> r = 31, m = 8, score = 250
+Gold500's size: (73, 81) -> r = 37, m = 16, score = 500
+Gold1000's size: (313, 313) -> r = 156, m = 32, score = 1000
+diamond's size: (51, 46) -> r = 24, m = 2, score = 2000
+bomb's size: (96, 96) -> r = 48, m = 20, score = -500
+rock10's size: (37, 35) -> r = 18, m = 2, score = 10
+rock20's size: (48, 39) -> r = 20, m = 2, score = 20 
 Claw's size: (22, 18) -> r = 9

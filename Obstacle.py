@@ -1,5 +1,6 @@
 import math
 import pygame
+from Explosion import Explosion, split_explosion_sprite_sheet
 
 class Obstacle:
     def __init__(self, x : int, y : int):
@@ -28,9 +29,9 @@ class Claw(Obstacle):
         self.original_image = self.image
     # Rotate logic
     def rotate(self, screen) -> None:
-        if self.angle <= 30:
+        if self.angle <= 20:
             self.direction = 1
-        elif self.angle >= 80: 
+        elif self.angle >= 90: 
             self.direction = -1
 
         self.angle += self.direction
@@ -78,6 +79,8 @@ class Gold(Obstacle):
         self.point = None
         self.mass = None
         self.is_pulled = False
+        self.exist = True
+
     def update(self, screen, claw_x, claw_y, claw_speed) -> None:
         if self.is_pulled:
             dy = abs(self.y - claw_y)
@@ -139,3 +142,47 @@ class Gold_1000(Gold):
         self.point = 1000
         self.mass = 32
 
+class Diamond(Gold):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.image = pygame.image.load("Assets/diamond.png")
+        self.r = 24
+        self.point = 2000
+        self.mass = 2
+
+class Rock_10(Gold):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.image = pygame.image.load("Assets/rock10.png")
+        self.r = 18
+        self.point = 10
+        self.mass = 2
+
+class Rock_20(Gold):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.image = pygame.image.load("Assets/rock20.png")
+        self.r = 20
+        self.point = 20
+        self.mass = 2
+
+class Bomb(Obstacle):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.r = 48
+        self.point = -500
+        self.explode_range = 80
+        self.image = pygame.image.load("Assets/bomb.png")
+        self.exploding = False
+
+        frames = split_explosion_sprite_sheet("Assets/explosion.png")
+        self.explosion : Explosion = Explosion(frames = frames, pos = (x, y))
+
+    def update(self, screen : pygame.Surface):
+        if self.exploding:
+            self.explosion.update(screen = screen)
+        else:
+            image = self.image
+            rect = image.get_rect(center = (self.x,self.y))
+            screen.blit(image, rect)
+    

@@ -2,6 +2,7 @@ import pygame
 import math
 from Obstacle import *
 from hand_control import HandTracker
+from Generator import Generator
 
 def collide(obs_1 : Obstacle, obs_2 : Obstacle) -> bool:
     d = distance(obs_1, obs_2)
@@ -22,7 +23,10 @@ def main():
     clock = pygame.time.Clock()
 
     claw = Claw(50, 100)
-    golds : list[Gold] = [Gold_1000(600, 600), Gold_500(300, 300), Gold_250(200, 200), Gold_100(400, 200)]
+
+    generator = Generator()
+    golds, bombs = generator.spawn_objects(width = 800, height = 800, n_golds=15, n_bombs=5)
+
     hand = HandTracker(show_cam = True)
 
     # Colors
@@ -43,6 +47,7 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
+        # Close palm to shoot
         if not stretch and hand.gesture == 1:
             stretch = True
             origin_x = claw.get_x()
@@ -60,34 +65,43 @@ def main():
             if claw.get_x() <= origin_x and claw.get_y() <= origin_y:
                 stretch = False
                 pull = False
-            
-            if not (claw.get_x() <= WIDTH - 100 and  claw.get_y() <= HEIGHT - 100):
+            # Pull back if the claw went out the screen
+            if not (claw.get_x() <= WIDTH - 50 and  claw.get_y() <= HEIGHT - 50):
                 pull = True
 
-        for i in range(len(golds)):
-            gold = golds[i]
-
+        for gold in golds:
             if collide(claw, gold):
                 if gold.get_m():
                     claw.speed = origin_speed / gold.get_m()
                 gold.is_pulled = True 
                 pull = True
-            
             if distance(Obstacle(origin_x, origin_y), gold) <= claw.get_r() + gold.get_r():
                 SCORE += gold.point
-                golds.pop(i)
+                gold.exist = False
                 pull = False
                 stretch = False
                 claw.speed = origin_speed
 
-            if collide(claw,gold):
-                break
-
-        for gold in golds:
             try:
                 gold.update(screen, claw.get_x(), claw.get_y(), origin_speed)
             except:
                 print("No gold left.")
+
+        for bomb in bombs:
+            if collide(claw, bomb):
+                bomb.exploding = True
+                pull = True
+                for gold in golds:
+                    if distance(bomb, gold) < bomb.explode_range:
+                        gold.exist = False
+            try:
+                bomb.update(screen = screen)
+            except:
+                print("No bomb left.")
+
+        golds = [gold for gold in golds if gold.exist]
+        bombs = [bomb for bomb in bombs if not bomb.explosion.finished]
+            
         pygame.display.flip()
         clock.tick(60)
     pygame.quit()
