@@ -1,14 +1,16 @@
 import pygame
 import math
 from Obstacle import *
-from hand_control import HandTracker
+from Hand_control import HandTracker
 from Generator import Generator
+from Menu import Menu
+from Button import Button
 
 pygame.init()
 
 def collide(obs_1 : Obstacle, obs_2 : Obstacle) -> bool:
     d = distance(obs_1, obs_2)
-    if d <= obs_1.get_r() + obs_2.get_r() - 5:
+    if d <= obs_1.get_r() + obs_2.get_r() - 2:
         return True
     return False
 
@@ -20,7 +22,7 @@ def main():
     pygame.init()
 
     SCORE = 0
-    WIDTH, HEIGHT = 800, 800
+    WIDTH, HEIGHT = 1200, 800
     WHITE = (255, 255, 255)
     BLACK = (0,0,0)
 
@@ -29,15 +31,19 @@ def main():
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("Arial", 32)
 
+    main_menu = Menu("BackGrounds/mainmenu.jpg")
+    pause_menu = Menu("BackGrounds/pausemenu.png")
 
-    background = pygame.image.load("Assets/background.jpg")
+    setting_button = Button("Animations/settingbutton.png")
+
+    background = pygame.image.load("BackGrounds/background.jpg")
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
     claw = Claw(50, 50)
     generator = Generator()
     gold : list[Gold]
     bombs : list[Bomb]
-    golds , bombs = generator.spawn_objects(width = 800, height = 800, n_golds = 30, n_bombs = 5)
+    golds , bombs = generator.spawn_objects(width = WIDTH, height = HEIGHT, n_golds = 40, n_bombs = 10)
 
     hand = HandTracker(show_cam = True)
 
@@ -51,38 +57,66 @@ def main():
     running = True
 
     in_start_menu = True
+    in_pause_menu = False
     in_game = False
 
-    origin_x , origin_y = 0 , 0
+    origin_x , origin_y = 0, 0
     origin_speed = claw.get_speed()
+
+    def reset():
+        global claw, golds, bombs, stretch, pull, in_start_menu, in_game, in_pause_menu, origin_x, origin_y, origin_speed
+
+        claw = Claw(50, 50)
+        golds , bombs = generator.spawn_objects(width = WIDTH, height = HEIGHT, n_golds = 40, n_bombs = 10)
+
+        stretch = False
+        pull = False
+
+        in_start_menu = True
+        in_pause_menu = False
+        in_game = False
+
+        origin_x , origin_y = 0, 0
+        origin_speed = claw.get_speed()
 
     while running:
         screen.fill(BLACK)
+        
+        mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-        if in_start_menu and hand.gesture == 1:
-            in_start_menu = False
-            in_game = True
-        
-        if in_start_menu:
-            print("In start menu.")
+            if event.type == pygame.MOUSEBUTTONDOWN and setting_button.is_pressed(mouse_pos= mouse_pos):
+                in_pause_menu = True
 
+
+        if in_start_menu:
+            if hand.gesture == 1:
+                in_start_menu = False
+                in_game = True                     
+            main_menu.draw(screen= screen, pos= (0,0))
+
+        
         if in_game:
             # Close palm to shoot
-            if not stretch and hand.gesture == 1:
-                stretch = True
-                origin_x = claw.get_x()
-                origin_y = claw.get_y()
-            
+            if not in_pause_menu:
+                if not stretch and hand.gesture == 1:
+                    stretch = True
+                    origin_x = claw.get_x()
+                    origin_y = claw.get_y()
+
+            if in_pause_menu:
+                if hand.gesture == 1:
+                    reset()
+                
             if not stretch:
-                claw.rotate(screen)
+                claw.rotate()
 
             if stretch:
                 if not pull:
-                    claw.stretch(screen)
+                    claw.stretch()
                 else:
-                    claw.pull(screen, origin_x, origin_y)
+                    claw.pull(origin_x, origin_y)
 
                 if claw.get_x() <= origin_x and claw.get_y() <= origin_y:
                     stretch = False
@@ -130,30 +164,45 @@ def main():
             golds = [gold for gold in golds if gold.exist]
             bombs = [bomb for bomb in bombs if not bomb.explosion.finished]
 
-            screen.blit(background, (0,0))
-
             text = font.render(f"SCORE: {SCORE}", True, WHITE)
-            text_rect = text.get_rect(topleft=(300, 50))
+            text_rect = text.get_rect(topleft=(WIDTH - 600, 50))
             padding = 10
+            
             box_rect = pygame.Rect(
                 text_rect.left - padding,
                 text_rect.top - padding,
                 text_rect.width + padding * 2,
                 text_rect.height + padding * 2
             )
+
+            screen.blit(background, (0,0))
             pygame.draw.rect(screen, BLACK, box_rect)
-            screen.blit(text, (300, 50))
+            screen.blit(text, (WIDTH - 600, 50))
+            
+            setting_button.draw(screen= screen)
 
             claw.draw(screen= screen)
             for bomb in bombs:
                 bomb.draw(screen= screen)
             for gold in golds:
                 gold.draw(screen= screen)
+
+            if in_pause_menu:
+                if pause_menu.image:
+                    w , h = pause_menu.get_image_size()
+                    x = (WIDTH - w) // 2 - 350
+                    y = (HEIGHT - h) // 2 - 125
+
+                    pause_menu.draw(screen= screen, pos= (x , y))
         
 
         pygame.display.flip()
-        clock.tick(35)
+        clock.tick(45)
+
     pygame.quit()
+
+    
+
 
 if __name__ == "__main__":
     main()

@@ -31,7 +31,7 @@ class Claw(Obstacle):
         self.image = pygame.image.load("Assets/claw.png")
         self.original_image = self.image
     # Rotate logic
-    def rotate(self, screen) -> None:
+    def rotate(self) -> None:
         if self.angle <= 15:
             self.direction = 1
         elif self.angle >= 85: 
@@ -42,14 +42,14 @@ class Claw(Obstacle):
         self.y = int(math.sin(math.radians(self.angle)) * self.get_length())
 
     # Stretch logic
-    def stretch(self, screen) -> None:
+    def stretch(self) -> None:
         rad = math.radians(self.angle)
 
         self.x += math.cos(rad) * self.speed
         self.y += math.sin(rad) * self.speed  
     
     # Pull logic
-    def pull(self, screen, origin_x, origin_y) -> None:
+    def pull(self, origin_x, origin_y) -> None:
         if self.x > origin_x:
             rad = math.radians(self.angle)
 
@@ -172,7 +172,7 @@ class Bomb(Obstacle):
         self.image = pygame.image.load("Assets/bomb.png")
         self.exploding = False
 
-        frames = split_explosion_sprite_sheet("Assets/explosion.png")
+        frames = split_explosion_sprite_sheet("Animations/explosion.png")
         self.explosion : Explosion = Explosion(frames = frames, pos = (x, y))
 
     def draw(self, screen : pygame.Surface):

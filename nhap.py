@@ -1,3 +1,4 @@
-a = []
-for i,j in enumerate(a):
-    print(f"i:{i} j:{j}")
+a = (1,2)
+
+c,d  = a
+print(c,d)
