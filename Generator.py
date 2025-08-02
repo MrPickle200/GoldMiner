@@ -29,7 +29,7 @@ class Generator:
         return total_score
 
     def spawn_objects(self, width, height, n_golds, n_bombs, tolerance = 200):
-        all_gold_types = [Gold_50, Gold_100, Gold_250, Gold_500, Gold_1000, Diamond, Rock_10, Rock_20]
+        all_gold_types = [Gold_50, Gold_100, Gold_250, Gold_500, Diamond, Rock_10, Rock_20]
         golds = []
         bombs = []
         placed_objects = []

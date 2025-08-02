@@ -32,7 +32,7 @@ class Claw(Obstacle):
         self.original_image = self.image
     # Rotate logic
     def rotate(self) -> None:
-        if self.angle <= 15:
+        if self.angle <= 25:
             self.direction = 1
         elif self.angle >= 85: 
             self.direction = -1
