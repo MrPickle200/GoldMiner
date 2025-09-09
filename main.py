@@ -1,12 +1,11 @@
 import pygame
 import math
-from Obstacle import *
+from Obstacle import * 
 from Hand_control import HandTracker
 from Generator import Generator
-from Menu import Menu, Pause_Menu
 from Button import Button
 
-pygame.init()
+
 
 def collide(obs_1 : Obstacle, obs_2 : Obstacle) -> bool:
     d = distance(obs_1, obs_2)
@@ -72,9 +71,6 @@ def main():
     pygame.display.set_caption("Gold Miner")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("Arial", 32)
-
-    main_menu = Menu("BackGrounds/mainmenu.jpg")
-    pause_menu = Pause_Menu("BackGrounds/pausemenu.png")
 
     setting_button = Button("Animations/settingbutton.png")
 
@@ -161,7 +157,11 @@ def main():
                 in_game_time = pygame.time.get_ticks()
                 game_active =False
 
-            main_menu.draw(screen= screen, pos= (0,0))
+            text_1 = pygame.font.SysFont("Arial", 64).render("FDS GOLD MINER", True, WHITE)
+            screen.blit(text_1, (WIDTH // 2 - 200, HEIGHT // 2 - 150))
+
+            text_2 = pygame.font.SysFont("Arial", 32).render("Close your hand to start the game.", True, WHITE)
+            screen.blit(text_2, (WIDTH // 2 - 180, HEIGHT // 2))
    
         if in_game:
 
@@ -252,13 +252,20 @@ def main():
                 # DRAW PAUSE MENU
 
                 if in_pause_menu:
-                    if pause_menu.image:
-                        w , h = pause_menu.get_image_size()
-                        x = (WIDTH - w) // 2 
-                        y = (HEIGHT - h) // 2 
-                        pause_menu.draw(screen= screen, pos= (x , y))
-                    else:
-                        print("Pause menu image is NONE.")
+
+                    black_box = pygame.Rect(500, 270, 190, 160)
+                    resume_rect = pygame.Rect(520, 290, 150, 50)
+                    quit_rect = pygame.Rect(520, 360, 150, 50)
+
+                    pygame.draw.rect(screen, BLACK, black_box)
+                    pygame.draw.rect(screen, WHITE, resume_rect)
+                    pygame.draw.rect(screen, WHITE, quit_rect)
+
+                    resume_text = font.render('RESUME', True, BLACK)
+                    quit_text = font.render('QUIT', True, BLACK)
+
+                    screen.blit(resume_text, (525, 295))
+                    screen.blit(quit_text, (525, 365))
 
                 # DRAW TIME BOX
 
