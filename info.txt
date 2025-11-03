@@ -8,3 +8,8 @@ bomb's size: (96, 96) -> r = 45, m = 20, score = -100
 rock10's size: (37, 35) -> r = 15, m = 2, score = 10
 rock20's size: (48, 39) -> r = 17, m = 2, score = 20 
 Claw's size: (22, 18) -> r = 7
+
+modules required:
+- cv2
+- mediapipe
+- pygame
